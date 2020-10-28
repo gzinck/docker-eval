@@ -8,14 +8,19 @@ docker build --tag opencv-py:1.0 .
 3. Create and run the docker container with:
 ```sh
 docker run -dit \
-	--mount type=bind,source="$(pwd)",target=/benchmarks \
+	--mount type=bind,source="$(pwd)/benchmarks",target=/benchmarks \
+	--mount type=bind,source="$(pwd)/output",target=/output \
 	--name opencv-py \
 	opencv-py:1.0
 ```
    This will start the container in the background (hence the `-dit` flags).
-   Note that every time you make changes to the `Dockerfile` and rebuild
-   the image, you should create a new container (and probably delete the
-   old one---see step 7).
+   It also mounts two folders:
+   - The `/benchmarks` bind mount makes the benchmarks available in the
+     container.
+   - The `/output` bind mount makes a folder available for any benchmark
+     output which can be checked to ensure consistent results of image
+     processing tasks. The results are available on the host machine and the
+     docker container.
 4. Run the benchmarks with:
 ```sh
 docker exec -it opencv-py python3 benchmark.py

@@ -17,6 +17,7 @@ RUN apt-get update \
         libtiff-dev \
         libavformat-dev \
         libpq-dev \
+		vim \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install numpy
@@ -46,7 +47,7 @@ RUN pip3 install vse
 # Make sure to attach a volume for this
 RUN mkdir /benchmarks
 WORKDIR /benchmarks
-COPY requirements.txt /benchmarks/requirements.txt
+COPY ./benchmarks/requirements.txt /benchmarks/requirements.txt
 
 # See https://github.com/lessthanoptimal/SpeedTestCV/tree/master/opencv
 RUN python3 -m venv venv && \
