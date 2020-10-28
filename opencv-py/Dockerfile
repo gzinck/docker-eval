@@ -41,3 +41,14 @@ RUN cd ~/opencv/opencv && mkdir release && cd release && \
 
 RUN cd ~/opencv/opencv/release && make -j $(nproc) && make install
 RUN pip3 install vse
+# RUN apt-get update && apt-get install -y vim # for development
+
+# Make sure to attach a volume for this
+RUN mkdir /benchmarks
+WORKDIR /benchmarks
+COPY requirements.txt /benchmarks/requirements.txt
+
+# See https://github.com/lessthanoptimal/SpeedTestCV/tree/master/opencv
+RUN python3 -m venv venv && \
+		. venv/bin/activate && \
+		pip3 install -r requirements.txt
