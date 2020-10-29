@@ -1,0 +1,5 @@
+# Benchmark output folders
+*/output/*
+
+# Vim swap files
+*.swp

@@ -1,25 +1,53 @@
 # docker-eval
-Source code for an experiment evaluating to what extent docker can make experimental results repeatable, regardless of the platform and hardware.
 
-## Getting Started
+Source code for an experiment evaluating to what extent docker can make
+experimental results repeatable, regardless of the platform and hardware.
+
+# Running the Benchmarks
 
 1. Install Docker [here](https://docs.docker.com/get-docker/).
-2. Go to the `opencv-contrib` folder and run `docker build --tag opencvcontrib:1.0 .`. This will build a Docker image containing the non-free features (SIFT/SURF).
-3. Go to the root folder and build the docker image with `docker build --tag imagebench:1.0 .`.
-4. Create and run the docker container with
-   `docker run -dit --name ib imagebench:1.0`. This will start the
-   container in the background (hence the `-dit` flags).
-   Note that every time you make changes to the `Dockerfile` and rebuild
-   the image, you should create a new container (and probably delete the
-   old one---see step 7).
-5. Run the benchmarks using `docker exec -it ib python3 benchmark.py`. This
-   will run all benchmarks and show results as it progresses. It may take a
-   while.
-6. If you want to `ssh` into the container, run `docker exec -it ib /bin/bash`.
-   This allows you to manually run commands in the container. Make sure you
-   type `exit` to leave `ssh`.
-7. If you want to stop the container, run `docker stop ib`. Now that your
-   container has been created, you can start it back up again with `docker
-   start ib`. Note that the stop command may take a while.
-8. If you want to permanently remove the container before creating a fresh
-   one, run `docker rm --force ib`.
+2. Build the opencv-py container with:
+```sh
+docker build --tag opencv-py:1.0 .
+```
+3. If you are on mac/linux, create and run the docker container with:
+```sh
+docker run -dit \
+	--mount type=bind,source="$(pwd)/benchmarks",target=/benchmarks \
+	--mount type=bind,source="$(pwd)/output",target=/output \
+	--name opencv-py \
+	opencv-py:1.0
+```
+   If you are on Windows with PowerShell, use:
+```sh
+docker run -dit \
+	--mount type=bind,source=${PWD}/benchmarks,target=/benchmarks \
+	--mount type=bind,source=${PWD}/output,target=/output \
+	--name opencv-py \
+	opencv-py:1.0
+```
+   This will start the container in the background (hence the `-dit` flags).
+   It also mounts two folders:
+   - The `/benchmarks` bind mount makes the benchmarks available in the
+     container.
+   - The `/output` bind mount makes a folder available for any benchmark
+     output which can be checked to ensure consistent results of image
+     processing tasks. The results are available on the host machine and the
+     docker container.
+4. Run the benchmarks with:
+```sh
+docker exec -it opencv-py python3 benchmark.py
+```
+5. To `ssh` into the container, run:
+```sh
+docker exec -it opencv-py /bin/bash
+```
+6. To stop and start the container, run:
+```sh
+docker stop opencv-py # stops the container
+docker start opencv-py # starts the container
+```
+7. To permanently remove a container, run:
+```sh
+docker rm --force opencv-py
+```
