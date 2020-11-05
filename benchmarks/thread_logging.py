@@ -22,7 +22,7 @@ if (user_path == ""):
 else:
 	status_path = user_path
 
-status_filename = os.path.join(status_path, "PC_status_log.txt")
+status_filename = os.path.join(status_path, "../output/PC_status_log.txt")
 
 if os.path.exists(status_filename):
     append_write = 'a' # append if already exists

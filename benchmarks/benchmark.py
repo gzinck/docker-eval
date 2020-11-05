@@ -7,7 +7,7 @@ import csv
 from thread_logging import pre_benchmark_logging
 from thread_logging import post_benchmark_logging
 
-csv_file = open("./results.csv", "w")
+csv_file = open("../output/results.csv", "w")
 
 csv_writer = csv.writer(csv_file)
 
