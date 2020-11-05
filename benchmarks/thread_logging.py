@@ -115,14 +115,14 @@ class status_log_thread(threading.Thread):
 
 # Start logging
 
-pre_benchmark_logging()
+#pre_benchmark_logging()
 
 		
 # Do all the things!
 
-time.sleep(180) # Benchmark!
+#time.sleep(180) # Benchmark!
 	
 
 # Stop logging
 
-post_benchmark_logging()
+#post_benchmark_logging()
