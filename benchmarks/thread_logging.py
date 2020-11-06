@@ -87,6 +87,18 @@ def post_benchmark_logging():
 			th.end_flag = True
 			break
 
+def initialize_logging():
+	psutil.cpu_percent(interval=None) # First call returns bogus 0, next calls reset interval
+	
+def return_logging():
+	return psutil.cpu_percent(interval=None) # Percentage of CPU usage (over all CPUs)
+	# If this times the number of cores is only slightly above 100%, benchmark uses a single CPU core
+	
+def memory_logging():
+	return psutil.virtual_memory().percent # Percentage of memory in use
+	# Does not include swap memory in this version 
+	# We might want to use .available instead (and turn it into a percentage manually) 
+
 # Thread logger class
 
 class status_log_thread(threading.Thread):
@@ -111,6 +123,7 @@ class status_log_thread(threading.Thread):
 			time.sleep(5.0 - ((time.time() - self.start_time) % 5.0))
 			
 		print("Ending thread: " + self.name)
+
 
 
 # Start logging
