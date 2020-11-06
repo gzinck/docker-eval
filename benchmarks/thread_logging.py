@@ -22,7 +22,7 @@ if (user_path == ""):
 else:
 	status_path = user_path
 
-status_filename = os.path.join(status_path, "PC_status_log.txt")
+status_filename = os.path.join(status_path, "../output/PC_status_log.txt")
 
 if os.path.exists(status_filename):
     append_write = 'a' # append if already exists
@@ -115,14 +115,14 @@ class status_log_thread(threading.Thread):
 
 # Start logging
 
-pre_benchmark_logging()
+#pre_benchmark_logging()
 
 		
 # Do all the things!
 
-time.sleep(180) # Benchmark!
+#time.sleep(180) # Benchmark!
 	
 
 # Stop logging
 
-post_benchmark_logging()
+#post_benchmark_logging()
