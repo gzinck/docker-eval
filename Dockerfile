@@ -2,25 +2,26 @@ FROM python:3.7
 
 RUN apt-get update \
     && apt-get install -y \
-        build-essential \
-        cmake \
-        git \
-        wget \
-        unzip \
-        yasm \
-        pkg-config \
-        libswscale-dev \
-        libtbb2 \
-        libtbb-dev \
-        libjpeg-dev \
-        libpng-dev \
-        libtiff-dev \
-        libavformat-dev \
-        libpq-dev \
-		vim \
+        build-essential=12.6 \
+        cmake=3.13.4-1 \
+        git=1:2.20.1-2+deb10u3 \
+        wget=1.20.1-1.1 \
+        unzip=6.0-23+deb10u1 \
+        yasm=1.3.0-2+b1 \
+        pkg-config=0.29-6 \
+        libswscale-dev=7:4.1.6-1~deb10u1 \
+        libtbb2=2018~U6-4 \
+        libtbb-dev=2018~U6-4 \
+        libjpeg-dev=1:1.5.2-2 \
+        libpng-dev=1.6.36-6 \
+        libtiff-dev=4.1.0+git191117-2~deb10u1 \
+        libavformat-dev=7:4.1.6-1~deb10u1 \
+        libpq-dev=11.9-0+deb10u1 \
+		vim=2:8.1.0875-5 \
+	&& pip3 install psutil==5.7.3 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install numpy
+RUN pip install numpy==1.19.3
 
 RUN mkdir ~/opencv
 ENV OPENCV_VERSION="4.1.1"
