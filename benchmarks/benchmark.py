@@ -6,24 +6,33 @@ import gc
 import csv
 from thread_logging import pre_benchmark_logging
 from thread_logging import post_benchmark_logging
+from thread_logging import initialize_logging
+from thread_logging import return_logging
+from thread_logging import memory_logging
 
 csv_file = open("../output/results.csv", "w")
 
 csv_writer = csv.writer(csv_file)
 
-csv_contents = [['Benchmark', 'Image Path', 'Binary Path', 'Kernel Width', 'Average Time Elapsed (seconds)', 'Variance of Time Elapsed', 'Time Elapsed 1', 'Time Elapsed 2', 'Time Elapsed 3', 'Time Elapsed 4', 'Time Elapsed 5', 'Time Elapsed 6', 'Time Elapsed 7', 'Time Elapsed 8', 'Time Elapsed 9', 'Time Elapsed 10']]
+csv_contents = [['Benchmark', 'Image Path', 'Binary Path', 'Kernel Width', 'Average Time Elapsed (seconds)', 'Variance of Time Elapsed', 'Time Elapsed 1', 'Time Elapsed 2', 'Time Elapsed 3', 'Time Elapsed 4', 'Time Elapsed 5', 'Time Elapsed 6', 'Time Elapsed 7', 'Time Elapsed 8', 'Time Elapsed 9', 'Time Elapsed 10', 'Average CPU usage', 'Variange of CPU usage', 'CPU usage 1', 'CPU usage 2', 'CPU usage 3', 'CPU usage 4', 'CPU usage 5', 'CPU usage 6', 'CPU usage 7', 'CPU usage 8', 'CPU usage 9', 'CPU usage 10', 'Average memory usage', 'Variange of memory usage', 'memory usage 1', 'memory usage 2', 'memory usage 3', 'memory usage 4', 'memory usage 5', 'memory usage 6', 'memory usage 7', 'memory usage 8', 'memory usage 9', 'memory usage 10']]
 
+
+def measureMemoryUsage():
+	return memory_logging()
 
 def gaussianBlur():
 	cv2.GaussianBlur(img, (region_width, region_width), 0)
+	return measureMemoryUsage()
 
 def gradientSobel():
 	# Example converted it to CV_64F, which caused a massive slow down. Keeping it integer
 	cv2.Sobel(img, cv2.CV_16S, 1, 0, ksize=1)
 	cv2.Sobel(img, cv2.CV_16S, 0, 1, ksize=1)
+	return measureMemoryUsage()
 
 def meanThresh():
 	cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, region_width, 0)
+	return measureMemoryUsage()
 
 def computeHistogram():
 	hist =cv2.calcHist([img],[0],None,[256],[0,256])
@@ -31,6 +40,7 @@ def computeHistogram():
 	#	  print("[{:3d}] {}".format(i,hist[i]))
 	# print()
 	# print("total = {}".format(sum(hist)))
+	return measureMemoryUsage()
 
 def goodFeatures():
 	# Documentation was ambiguous if this was a weighted or unweighted variant. This ambiguity was resolved
@@ -39,6 +49,7 @@ def goodFeatures():
 	# and couldn't found any indication that Gaussian blur was applied
 	kp=cv2.goodFeaturesToTrack(img,0,qualityLevel=0.016,minDistance=10,blockSize=21)
 	# print("Shi-Tomasi count {}".format(len(kp)))
+	return measureMemoryUsage()
 
 def computeCanny():
 	# OpenCV's canny edge creates a binary image. This isn't very useful by itself. To process the edges you need
@@ -51,6 +62,7 @@ def computeCanny():
 	contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 	# total = sum( len(c) for c in contours )
 	# print("total canny contour {}".format(total))
+	return measureMemoryUsage()
 
 # SIFT and SURF are not included in the standard distribution of Python OpenCV due to legal concerns
 # Doing a custom build of OpenCV is beyond the scope scope of this benchmark since its only supposed to
@@ -63,6 +75,7 @@ if hasattr(cv2, 'xfeatures2d'):
 	def detectSift():
 		kp,des = sift.detectAndCompute(img, None)
 		# print("SIFT found {:d}".format(len(kp)))
+		return measureMemoryUsage()
 
 	# original paper had 4 scales per octave
 	# threshold tuned to detect 10,000 features
@@ -71,6 +84,7 @@ if hasattr(cv2, 'xfeatures2d'):
 	def detectSurf():
 		kp,des = surf.detectAndCompute(img, None)
 		# print("SURF found {:d}".format(len(kp)))
+		return measureMemoryUsage()
 
 
 def contour():
@@ -81,6 +95,7 @@ def contour():
 	contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
 	# total = sum( len(c) for c in contours )
 	# print("total pixels {}".format(total))
+	return measureMemoryUsage()
 
 def houghLine():
 	# OpenCV contains 3 Hough Line algorithms. CV_HOUGH_STANDARD is the closest to the variants included
@@ -88,6 +103,7 @@ def houghLine():
 
 	lines = cv2.HoughLines(img, rho=5, theta=np.pi/180, threshold=15000)
 	# print("total lines {}".format(len(lines)))
+	return measureMemoryUsage()
 
 #common operations to expand ML dataset:
 def resize():
@@ -99,35 +115,47 @@ def resize():
 
 	#Bring it back up to the size it was before -- linear by default
 	larger_image = cv2.resize(img,(img_width_original,img_height_original)) 
+	return measureMemoryUsage()
 
 def rotate():
 	rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+	return measureMemoryUsage()
   
 def mirror():
 	mirrored = cv2.flip(img, 0)
 	mirrored = cv2.flip(img, 1)
 	mirrored = cv2.flip(img, -1)
+	return measureMemoryUsage()
 
 def benchmark( f , num_trials=10):
 	
 	gc.collect()
 	times=[]
+	memorys=[]
+	cpus=[]
 	for trials in range(num_trials):
+		initialize_logging()
 		t0 = time.time()
-		f()
+		memoryUsage = f()
 		t1 = time.time()
+		cpuUsage=return_logging()
 		times.append((t1-t0)*1000)
+		memorys.append(memoryUsage)
+		cpus.append(cpuUsage)
 	if (len(times) <= 2):
 		time_variance = 'N/A'
+		cpu_variance = 'N/A'
+		memory_variance = 'N/A'
 	else:
 		time_variance = statistics.variance(times)
-	return [statistics.mean(times)] + [time_variance] + times
+		cpu_variance = statistics.variance(cpus)
+		memory_variance = statistics.variance(memorys)
+	return [statistics.mean(times)] + [time_variance] + times + [statistics.mean(cpus)] + [cpu_variance] + cpus + [statistics.mean(memorys)] + [memory_variance] + memorys
 
 image_paths = ["./data/chessboard_large.jpg"]
 binary_paths = ["./data/binary.png"]
 radii = [3]
 
-pre_benchmark_logging()
 for i in range(len(image_paths)):
 	
 	image_path = image_paths[i]
@@ -144,6 +172,9 @@ for i in range(len(image_paths)):
 		region_radius = radius
 		print("Radius: " + str(radius))
 		region_width = region_radius*2+1
+		# How long does it take just to measure memory usage?
+		csv_contents.append([measureMemoryUsage.__name__, image_path, binary_path, region_width] + benchmark(measureMemoryUsage))
+		
 		#run all the tests again with the new parameters
 		csv_contents.append([resize.__name__, image_path, binary_path, region_width] + benchmark(resize))
 		csv_contents.append([rotate.__name__, image_path, binary_path, region_width] + benchmark(rotate))
