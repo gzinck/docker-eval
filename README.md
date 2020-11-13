@@ -23,8 +23,8 @@ sudo apt-get update
 For other distributions, visit https://nvidia.github.io/nvidia-container-runtime/
 
 For Windows/Mac, it might just work with a device pass-through? (something like adding "--device class/5B45201D-F2F2-4F3B-85BB-30FF1F953599" to the run command (varies per GPU). On Ubuntu, this might still work with "--device /dev/nvidia0:/dev/nvidia0 --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm" but is definitely deprecated.)
-```
-```
+
+
 4. Make sure you have a dedicated NVidia graphics driver installed
 Follow for example this guide: https://www.cyberciti.biz/faq/ubuntu-linux-install-nvidia-driver-latest-proprietary-driver/
 Verify that you can run from the host system:
