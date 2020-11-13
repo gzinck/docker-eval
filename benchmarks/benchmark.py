@@ -5,6 +5,7 @@ import numpy as np
 import gc
 import csv
 import os
+import socket
 from datetime import datetime
 from thread_logging import pre_benchmark_logging
 from thread_logging import post_benchmark_logging
@@ -14,12 +15,12 @@ from thread_logging import memory_logging
 
 now = datetime.now()
 date_time = now.strftime("%m-%d-%Y_%H:%M:%S")
+log_name = str(socket.gethostname()) + "-" + str(date_time)
 
 if not os.path.exists("../output"):
     os.makedirs("../output")
 csv_file = open("../output/results.csv", "w")
-csv_file_timed = open("../output/" + date_time + ".csv", "w")
-
+csv_file_timed = open("../output/" + log_name + ".csv", "w")
 
 csv_writer = csv.writer(csv_file)
 csv_writer_timed = csv.writer(csv_file_timed)
