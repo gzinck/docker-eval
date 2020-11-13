@@ -55,10 +55,12 @@ def log_status_start():
 	status_log_file.close()
 	load = psutil.getloadavg() # do once initially to start the first minute measurement
 	
-def log_status_end():
-	status_log_file = open(status_filename, append_write)
+def log_status_end(date_time):
+	dated_filename = os.path.join(status_path, "../output/" + str(date_time) + ".txt")
+	status_log_file = open(dated_filename, append_write)
 	
 	# Just for sanity check, log environment again
+	status_log_file.write("Benchmark finished here.\n")
 	status_log_file.write(get_environment_string())
 	end_time = datetime.now()
 	status_log_file.write("PC_stats_log_end: " + str(end_time) + "\n")
@@ -74,14 +76,14 @@ def get_environment_string():
 		"\n")
 	return return_string
 
-def pre_benchmark_logging():
+def pre_benchmark_logging(date_time):
 	logging_thread = status_log_thread(1, "Logging_Thread_1")
 	logging_thread.start()
 	threads.append(logging_thread)
 	
 
-def post_benchmark_logging():
-	log_status_end() # Not inside the thread since it can add up to 5 second delay until it finishes.
+def post_benchmark_logging(date_time):
+	log_status_end(date_time) # Not inside the thread since it can add up to 5 second delay until it finishes.
 	for th in threads:
 		if (th.name == "Logging_Thread_1"):
 			th.end_flag = True
