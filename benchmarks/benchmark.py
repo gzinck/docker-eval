@@ -15,6 +15,8 @@ from thread_logging import memory_logging
 now = datetime.now()
 date_time = now.strftime("%m-%d-%Y_%H:%M:%S")
 
+if not os.path.exists("../output"):
+    os.makedirs("../output")
 csv_file = open("../output/results.csv", "w")
 csv_file_timed = open("../output/" + date_time + ".csv", "w")
 
