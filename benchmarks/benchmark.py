@@ -208,15 +208,15 @@ for radius in radii:
 				#img_binary = cv2.imread(binary_path, cv2.IMREAD_GRAYSCALE)
 				#run all the tests again with the new parameters
 
-				tempDataStorage = addToTempStorage(tempDataStorage, [resize.__name__, source_video, image_path, region_width] + benchmark(resize, img, 5))
-				tempDataStorage = addToTempStorage(tempDataStorage, [rotate.__name__, source_video, image_path, region_width] + benchmark(rotate, img, 5))
-				tempDataStorage = addToTempStorage(tempDataStorage, [mirror.__name__, source_video, image_path, region_width] + benchmark(mirror, img, 5))
+				tempDataStorage = addToTempStorage(tempDataStorage, [resize.__name__, source_video, image_path, region_width] + benchmark(resize, img, 10))
+				tempDataStorage = addToTempStorage(tempDataStorage, [rotate.__name__, source_video, image_path, region_width] + benchmark(rotate, img, 10))
+				tempDataStorage = addToTempStorage(tempDataStorage, [mirror.__name__, source_video, image_path, region_width] + benchmark(mirror, img, 10))
 				tempDataStorage = addToTempStorage(tempDataStorage, [contour.__name__, source_video, image_path, region_width] + benchmark(contour, img))
 				#img_binary = None
-				tempDataStorage = addToTempStorage(tempDataStorage, [gaussianBlur.__name__, source_video, image_path, region_width] + benchmark(gaussianBlur, img, 5))
+				tempDataStorage = addToTempStorage(tempDataStorage, [gaussianBlur.__name__, source_video, image_path, region_width] + benchmark(gaussianBlur, img, 10))
 				tempDataStorage = addToTempStorage(tempDataStorage, [meanThresh.__name__, source_video, image_path, region_width] + benchmark(meanThresh, img))
 				tempDataStorage = addToTempStorage(tempDataStorage, [gradientSobel.__name__, source_video, image_path, region_width] + benchmark(gradientSobel, img))
-				tempDataStorage = addToTempStorage(tempDataStorage, [computeHistogram.__name__, source_video, image_path, region_width] + benchmark(computeHistogram, img, 5))
+				tempDataStorage = addToTempStorage(tempDataStorage, [computeHistogram.__name__, source_video, image_path, region_width] + benchmark(computeHistogram, img, 10))
 				tempDataStorage = addToTempStorage(tempDataStorage, [computeCanny.__name__, source_video, image_path, region_width] + benchmark(computeCanny, img))
 				if hasattr(cv2, 'xfeatures2d'):
 					tempDataStorage = addToTempStorage(tempDataStorage, [detectSift.__name__, source_video, image_path, region_width] + benchmark(detectSift, img))
