@@ -14,7 +14,7 @@ from thread_logging import return_logging
 from thread_logging import memory_logging
 
 now = datetime.now()
-date_time = now.strftime("%m-%d-%Y_%H:%M:%S")
+date_time = now.strftime("%m-%d-%Y_%H-%M-%S")
 log_name = str(socket.gethostname()) + "-" + str(date_time)
 
 if not os.path.exists("../output"):
