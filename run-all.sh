@@ -57,6 +57,7 @@ for n in {0..9}; do
 	echo '=================================='
 	
 	# Native trial
+	echo "Performing trial $n---native"
 	$SOURCE benchmarks/venv/bin/activate
 	cd benchmarks && python3 benchmark.py && cd ..
 	deactivate
@@ -65,6 +66,7 @@ for n in {0..9}; do
 	mv output/results.csv "$OUT/native-$n.csv"
 
 	# Docker trial
+	echo "Performing trial $n---docker"
 	docker run -it --rm \
         --mount type=bind,source="$(pwd)/benchmarks",target=/benchmarks \
         --mount type=bind,source="$(pwd)/output",target=/output \
