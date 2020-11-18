@@ -1,8 +1,11 @@
 # Benchmark output folders
-*/output/*
+**/output/*
 
 # Vim swap files
 *.swp
 
-#Python temp folders
-*/benchmarks/__pycache__/*
+# Python temp folders
+**/benchmarks/__pycache__
+
+# The virtual python environment
+**/venv
