@@ -8,10 +8,8 @@
 # Get the source command we will need to use, based on OS
 # (on Linux, rather than doing "source SOME_FILE", you do
 # ". SOME_FILE").
-case "$(uname -s)" in
-    Darwin*)    SOURCE='source';;
-    *)          SOURCE='.'
-esac
+SOURCE='source'
+ENV_ACTIVATE='venv/bin/activate'
 
 # Make sure output directory exists
 if ! [ -d 'output' ]; then
@@ -33,7 +31,7 @@ mkdir $OUT
 #fi
 
 # Step 2: check if the venv is set up.
-if ! $SOURCE benchmarks/venv/bin/activate; then
+if ! $SOURCE $ENV_ACTIVATE; then
 	echo 'CRITICAL ERROR: Failed to activate venv for native python setup'
 	exit 1
 fi
@@ -58,7 +56,7 @@ for n in {0..9}; do
 	
 	# Native trial
 	echo "Performing trial $n---native"
-	$SOURCE benchmarks/venv/bin/activate
+	$SOURCE $ENV_ACTIVATE
 	cd benchmarks && python3 benchmark.py && cd ..
 	deactivate
 
