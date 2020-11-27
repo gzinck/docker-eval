@@ -6,6 +6,7 @@ import gc
 import csv
 import os
 import socket
+import random
 from datetime import datetime
 from thread_logging import pre_benchmark_logging
 from thread_logging import post_benchmark_logging
@@ -180,6 +181,9 @@ for width in widths:
 		tempDataStorage = [[], [], [], [], [], [], [], [], [], [], [], [], [], []] # one for each benchmark
 		for filename in os.listdir(directory):
 			if filename.endswith(".jpg") or filename.endswith(".png"):
+
+				random.seed(69420)
+				cv2.setRNGSeed(69420)
 				image_path = os.path.join(directory, filename)
 				print("Image path: " + str(image_path))
 
