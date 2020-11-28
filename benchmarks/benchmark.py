@@ -111,12 +111,12 @@ if hasattr(cv2, 'xfeatures2d'):
 	# This has been configured to be the same as the Lowe's paper. 3 layers per octave.
 	# It's not clear how many octaves are used and if the first layer is at twice the input as recommend by Lowe but
 	# frequently not done due to speed hit
-	sift = cv2.xfeatures2d.SIFT_create(nfeatures=10000, nOctaveLayers=3, contrastThreshold=0.04, edgeThreshold=10, sigma=1.6)
 	def detectSift(img):
+		sift = cv2.xfeatures2d.SIFT_create(nfeatures=10000, nOctaveLayers=3, contrastThreshold=0.04, edgeThreshold=10, sigma=1.6)
 		kp,des = sift.detectAndCompute(img, None)
 
-	surf = cv2.xfeatures2d.SURF_create(hessianThreshold=420, nOctaves=4, nOctaveLayers=4, extended=False, upright=False)
 	def detectSurf(img):
+		surf = cv2.xfeatures2d.SURF_create(hessianThreshold=420, nOctaves=4, nOctaveLayers=4, extended=False, upright=False)
 		kp,des = surf.detectAndCompute(img, None)
 
 def contour(img):
