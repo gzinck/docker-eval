@@ -10,6 +10,7 @@
 # ". SOME_FILE").
 
 ENV_ENABLED=0 # To enable, change to 1
+PYTHON='python3' # Change to 'python' if this doesn't work
 SOURCE='source'
 ENV_ACTIVATE='venv/bin/activate'
 
@@ -44,7 +45,7 @@ if [ $ENV_ENABLED -eq 1 ]; then
 fi
 
 # Step 3: check if the packages are available inside of venv
-if ! python3 -c 'import cv2 ; import numpy ; import psutil'; then
+if ! $PYTHON -c 'import cv2 ; import numpy ; import psutil'; then
 	echo 'CRITICAL ERROR: Failed to import cv2, numpy, or psutil in the native setup'
 	exit 1
 fi
@@ -68,7 +69,7 @@ for n in {0..9}; do
 	if [ $ENV_ENABLED -eq 1 ]; then
 		$SOURCE $ENV_ACTIVATE
 	fi
-	cd benchmarks && python3 benchmark.py && cd ..
+	cd benchmarks && $PYTHON benchmark.py && cd ..
 	if [ $ENV_ENABLED -eq 1 ]; then
 		deactivate
 	fi
