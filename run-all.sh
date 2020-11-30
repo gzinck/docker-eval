@@ -8,8 +8,14 @@
 # Get the source command we will need to use, based on OS
 # (on Linux, rather than doing "source SOME_FILE", you do
 # ". SOME_FILE").
+
+ENV_ENABLED=0 # To enable, change to 1
+PYTHON='python3' # Change to 'python' if this doesn't work
 SOURCE='source'
 ENV_ACTIVATE='venv/bin/activate'
+
+# Exit on control-c
+trap "exit" INT
 
 # Make sure output directory exists
 if ! [ -d 'output' ]; then
@@ -31,19 +37,23 @@ mkdir $OUT
 #fi
 
 # Step 2: check if the venv is set up.
-if ! $SOURCE $ENV_ACTIVATE; then
-	echo 'CRITICAL ERROR: Failed to activate venv for native python setup'
-	exit 1
+if [ $ENV_ENABLED -eq 1 ]; then
+	if ! $SOURCE $ENV_ACTIVATE; then
+		echo 'CRITICAL ERROR: Failed to activate venv for native python setup'
+		exit 1
+	fi
 fi
 
 # Step 3: check if the packages are available inside of venv
-if ! python3 -c 'import cv2 ; import numpy ; import psutil'; then
-	echo 'CRITICAL ERROR: Failed to import cv2, numpy, or psutil in the native venv'
+if ! $PYTHON -c 'import cv2 ; import numpy ; import psutil'; then
+	echo 'CRITICAL ERROR: Failed to import cv2, numpy, or psutil in the native setup'
 	exit 1
 fi
 
 # Shut down the venv for now
-deactivate
+if [ $ENV_ENABLED -eq 1 ]; then
+	deactivate
+fi
 
 #===========================================================
 # Run 10 trials
@@ -56,9 +66,13 @@ for n in {0..9}; do
 	
 	# Native trial
 	echo "Performing trial $n---native"
-	$SOURCE $ENV_ACTIVATE
-	cd benchmarks && python3 benchmark.py && cd ..
-	deactivate
+	if [ $ENV_ENABLED -eq 1 ]; then
+		$SOURCE $ENV_ACTIVATE
+	fi
+	cd benchmarks && $PYTHON benchmark.py && cd ..
+	if [ $ENV_ENABLED -eq 1 ]; then
+		deactivate
+	fi
 
 	# Get the most recent item, move it
 	mv output/results.csv "$OUT/native-$n.csv"
