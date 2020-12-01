@@ -10,7 +10,7 @@
 # ". SOME_FILE").
 
 ENV_ENABLED=0 # To enable, change to 1
-PYTHON='python' # Change to 'python' if this doesn't work
+PYTHON='python3' # Change to 'python' if this doesn't work
 SOURCE='source'
 ENV_ACTIVATE='venv/bin/activate'
 
