@@ -75,17 +75,20 @@ for n in {0..9}; do
 	fi
 
 	# Get the most recent item, move it
-	mv output/results.csv "$OUT/native-$n.csv"
+	mv "$(pwd)/output/results.csv" "$OUT/native-$n.csv"
+
+	# not sure why tf we have to do this but in Docker (Windows), it won't create a new results.csv file if it doesn't exist
+	touch "$(pwd)/output/results.csv"
 
 	# Docker trial
 	echo "Performing trial $n---docker"
-	docker run -it --rm \
+	docker run -i --rm \
         --mount type=bind,source="$(pwd)/benchmarks",target=/benchmarks \
         --mount type=bind,source="$(pwd)/output",target=/output \
         opencv-py:1.0 python3 benchmark.py
 	
 	# Get the most recent item, move it
-	mv output/results.csv "$OUT/docker-$n.csv"
+	mv "$(pwd)/output/results.csv" "$OUT/docker-$n.csv"
 done
 
 echo "Experiment complete! See the results in the folder $OUT"
