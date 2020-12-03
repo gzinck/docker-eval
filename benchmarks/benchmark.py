@@ -7,12 +7,16 @@ import csv
 import os
 import socket
 import random
+import hashlib
+import sys
 from datetime import datetime
 from thread_logging import pre_benchmark_logging
 from thread_logging import post_benchmark_logging
 from thread_logging import initialize_logging
 from thread_logging import return_logging
 from thread_logging import memory_logging
+
+np.set_printoptions(threshold=sys.maxsize)
 
 now = datetime.now()
 date_time = now.strftime("%m-%d-%Y_%H-%M-%S")
@@ -22,6 +26,7 @@ if not os.path.exists("../output"):
 	os.makedirs("../output")
 csv_file = open("../output/results.csv", "w")
 csv_file_timed = open("../output/" + log_name + ".csv", "w")
+results_text = open("../output/results_text.txt", "w")
 
 csv_writer = csv.writer(csv_file)
 csv_writer_timed = csv.writer(csv_file_timed)
@@ -79,18 +84,24 @@ def loadImageBench(imgPath):
 	return cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
 def gaussianBlur(img):
-	cv2.GaussianBlur(img, (region_width, region_width), 0)
+	#cv2.imwrite("gaussianBlur.png", img) 
+	blurred = cv2.GaussianBlur(img, (region_width, region_width), 0)
+	#cv2.imwrite("gaussianBlur2.png", blurred) 
+	#cv2.imwrite("gaussianBlur3.png", img) 
 
 def gradientSobel(img):
 	# Example converted it to CV_64F, which caused a massive slow down. Keeping it integer
 	cv2.Sobel(img, cv2.CV_16S, 1, 0, ksize=1)
 	cv2.Sobel(img, cv2.CV_16S, 0, 1, ksize=1)
+	#cv2.imwrite("gradientSobel.png", img) 
 
 def meanThresh(img):
 	cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, region_width, 0)
+	#cv2.imwrite("meanThresh.png", img) 
 
 def computeHistogram(img):
-	hist =cv2.calcHist([img],[0],None,[256],[0,256])
+	hist = cv2.calcHist([img],[0],None,[256],[0,256])
+	results_text.write(str(hist))
 
 def goodFeatures(img):
 	# Documentation was ambiguous if this was a weighted or unweighted variant. This ambiguity was resolved
@@ -98,6 +109,8 @@ def goodFeatures(img):
 	# and not on the corner, therefor it was the unweighted variant. I also inspected the C++ source code
 	# and couldn't found any indication that Gaussian blur was applied
 	kp = cv2.goodFeaturesToTrack(img,0,qualityLevel=0.016,minDistance=10,blockSize=21)
+	#results_text.write("goodFeatures")
+	results_text.write(str(kp))
 
 
 def computeCanny(img):
@@ -105,7 +118,8 @@ def computeCanny(img):
 	# to extract the contours from the output binary image. I've used the values specified in an opencv example
 	# https://docs.opencv.org/3.4.3/df/d0d/tutorial_find_contours.html
 	edges = cv2.Canny(img, 15, 110)
-
+	#cv2.imwrite("edges.png", img) 
+	results_text.write(str(edges))
 	contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
 if hasattr(cv2, 'xfeatures2d'):
@@ -115,20 +129,33 @@ if hasattr(cv2, 'xfeatures2d'):
 	sift = cv2.xfeatures2d.SIFT_create(nfeatures=10000, nOctaveLayers=3, contrastThreshold=0.04, edgeThreshold=10, sigma=1.6)
 	def detectSift(img):
 		kp,des = sift.detectAndCompute(img, None)
+		#results_text.write("kp")
+		results_text.write(str(kp))
+		results_text.write(str(des))
 
 	surf = cv2.xfeatures2d.SURF_create(hessianThreshold=420, nOctaves=4, nOctaveLayers=4, extended=False, upright=False)
 	def detectSurf(img):
 		kp,des = surf.detectAndCompute(img, None)
+		#results_text.write("kp")
+		results_text.write(str(kp))
+		results_text.write(str(des))
+
 
 def contour(img):
 	# Convert to black and white first
 	img_binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)[1]
+	#cv2.imwrite("contour.png", img_binary) 
 
 	# Find Contours
 	contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
+	#results_text.write("contours")
+	results_text.write(str(contours))
+	results_text.write(str(hierarchy))
+	#results_text.write(hashlib.sha256(contours).digest())
 
 def houghLine(img):
 	lines = cv2.HoughLines(img, rho=5, theta=np.pi/180, threshold=15000)
+	results_text.write(str(lines))
 
 
 def resize(img):
@@ -139,22 +166,25 @@ def resize(img):
 
 	#Bring it back up to the size it was before -- linear by default
 	larger_image = cv2.resize(img,(img_width_original,img_height_original)) 
+	#cv2.imwrite("resize.png", smaller_image) 
 
 def rotate(img):
 	rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+	#cv2.imwrite("rotate.png", rotated) 
   
 def mirror(img):
 	mirrored = cv2.flip(img, 0)
 	mirrored = cv2.flip(img, 1)
 	mirrored = cv2.flip(img, -1)
+	#cv2.imwrite("mirror.png", mirrored) 
 
 def benchmark(f, img, num_trials=1):
-	
 	gc.collect()
 	times=[]
 	initialize_logging()
 	for trials in range(num_trials):
 		t0 = time.time()
+		new_img = img
 		f(img)
 		t1 = time.time()
 		times.append((t1-t0)*1000)
@@ -241,4 +271,5 @@ post_benchmark_logging(date_time)
 
 csv_writer.writerows(csv_contents)
 csv_writer_timed.writerows(csv_contents)
+results_text.close()
 print("Done!")
