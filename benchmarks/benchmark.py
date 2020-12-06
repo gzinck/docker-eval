@@ -7,6 +7,7 @@ import csv
 import os
 import socket
 import random 
+import sys
 random.seed(2020)
 from datetime import datetime
 from thread_logging import pre_benchmark_logging
@@ -72,6 +73,12 @@ csv_contents = [['Benchmark',
                 'memory usage 10 (% of memory)']]
 
 global benchCounter
+global imgCounter
+imgName = ""
+if len(sys.argv) > 1:
+    imgName = str(sys.argv[1])
+
+imgCounter = 1
 
 def measureMemoryUsage():
     return memory_logging()
@@ -84,7 +91,7 @@ def contrastRandomization(img):
     alpha = random.uniform(1.0, 3.0)
     beta = random.uniform(0, 100)
     cv2.convertScaleAbs(img, alpha=2.2, beta=beta)
-	
+    
 def brightnessRandomization(img):
     value = random.uniform(0, 100)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -95,8 +102,8 @@ def brightnessRandomization(img):
     hsv[:,:,2][hsv[:,:,2]>255]  = 255
     hsv = np.array(hsv, dtype = np.uint8)
     cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-	
-	
+    
+    
 def gaussianBlur(img):
     cv2.GaussianBlur(img, (region_width, region_width), 0)
 
@@ -135,10 +142,17 @@ if hasattr(cv2, 'xfeatures2d'):
     def detectSift(img):
         sift = cv2.xfeatures2d.SIFT_create(nfeatures=10000, nOctaveLayers=3, contrastThreshold=0.04, edgeThreshold=10, sigma=1.6)
         kp,des = sift.detectAndCompute(img, None)
+        img = cv2.drawKeypoints(img,kp,img,flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        global imgCounter
+        cv2.imwrite('sift_keypoints' + str(imgCounter) + imgName + '.jpg',img)
     
     def detectSurf(img):
         surf = cv2.xfeatures2d.SURF_create(hessianThreshold=420, nOctaves=4, nOctaveLayers=4, extended=False, upright=False)
         kp,des = surf.detectAndCompute(img, None)
+        img = cv2.drawKeypoints(img,kp,img,flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        global imgCounter
+        cv2.imwrite('surf_keypoints' + str(imgCounter) + imgName + '.jpg',img)
+        imgCounter = imgCounter + 1
 
 def contour(img):
     # Convert to black and white first
