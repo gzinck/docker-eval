@@ -84,7 +84,7 @@ def contrastRandomization(img):
     alpha = random.uniform(1.0, 3.0)
     beta = random.uniform(0, 100)
     cv2.convertScaleAbs(img, alpha=2.2, beta=beta)
-	
+    
 def brightnessRandomization(img):
     value = random.uniform(0, 100)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -95,8 +95,8 @@ def brightnessRandomization(img):
     hsv[:,:,2][hsv[:,:,2]>255]  = 255
     hsv = np.array(hsv, dtype = np.uint8)
     cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-	
-	
+    
+    
 def gaussianBlur(img):
     cv2.GaussianBlur(img, (region_width, region_width), 0)
 
@@ -148,8 +148,30 @@ def contour(img):
     contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
 
 def houghLine(img):
-    lines = cv2.HoughLines(img, rho=5, theta=np.pi/180, threshold=15000)
+    edges = cv2.Canny(img, 50, 150, apertureSize = 3)
+    lines = cv2.HoughLines(edges, 1,np.pi/180,220)
 
+    # render and export Hough lines
+    ''' 
+    new = img.copy()
+    if not lines is None:
+        for line in lines:
+            for rho, theta in line:
+                a = np.cos(theta)
+                b = np.sin(theta)
+                x0 = a*rho
+                y0 = b*rho
+                x1 = int(x0 + 1000*(-b))
+                y1 = int(y0 + 1000*(a))
+                x2 = int(x0 - 1000*(-b))
+                y2 = int(y0 - 1000*(a))
+
+                #if theta > np.pi / 3 and theta < np.pi * 2 / 3:
+                cv2.line(new,(x1,y1),(x2,y2),(0,0,255),2)
+                #print(str(x1) + "," + str(y1) + " / " + str(x2) + "," + str(y2))
+
+    cv2.imwrite('houghlines.jpg',new)
+    '''
 
 def resize(img):
     img_width_original = img.shape[0]
