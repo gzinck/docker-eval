@@ -84,7 +84,7 @@ def contrastRandomization(img):
     alpha = random.uniform(1.0, 3.0)
     beta = random.uniform(0, 100)
     cv2.convertScaleAbs(img, alpha=2.2, beta=beta)
-	
+    
 def brightnessRandomization(img):
     value = random.uniform(0, 100)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -95,8 +95,8 @@ def brightnessRandomization(img):
     hsv[:,:,2][hsv[:,:,2]>255]  = 255
     hsv = np.array(hsv, dtype = np.uint8)
     cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-	
-	
+    
+    
 def gaussianBlur(img):
     cv2.GaussianBlur(img, (region_width, region_width), 0)
 
@@ -148,8 +148,30 @@ def contour(img):
     contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
 
 def houghLine(img):
-    lines = cv2.HoughLines(img, rho=5, theta=np.pi/180, threshold=15000)
+    edges = cv2.Canny(img, 50, 150, apertureSize = 3)
+    lines = cv2.HoughLines(edges, 1,np.pi/180,220)
 
+    # render and export Hough lines
+    ''' 
+    new = img.copy()
+    if not lines is None:
+        for line in lines:
+            for rho, theta in line:
+                a = np.cos(theta)
+                b = np.sin(theta)
+                x0 = a*rho
+                y0 = b*rho
+                x1 = int(x0 + 1000*(-b))
+                y1 = int(y0 + 1000*(a))
+                x2 = int(x0 - 1000*(-b))
+                y2 = int(y0 - 1000*(a))
+
+                #if theta > np.pi / 3 and theta < np.pi * 2 / 3:
+                cv2.line(new,(x1,y1),(x2,y2),(0,0,255),2)
+                #print(str(x1) + "," + str(y1) + " / " + str(x2) + "," + str(y2))
+
+    cv2.imwrite('houghlines.jpg',new)
+    '''
 
 def resize(img):
     img_width_original = img.shape[0]
@@ -178,9 +200,21 @@ def benchmark(f, img, num_trials=1):
         f(img)
         t1 = time.time()
         times.append((t1-t0)*1000)
-    cpuMean = return_logging()
-    memoryUsageAfterBenchmark = measureMemoryUsage()
     runtime = times[0]
+    
+    if runtime < 10: # The short benchmarks are in this range, and if 1ms is our smallest unit, measuring accuracy is horrible for small values
+        initialize_logging()
+        t0 = time.time()
+        for trials in range(25):
+            f(img)
+        t1 = time.time()
+        runtime = (t1-t0)*40 # * 1000 / 25 --> * 40
+        cpuMean = return_logging() 
+        memoryUsageAfterBenchmark = measureMemoryUsage()
+    else: # putting it in else keeps overhead small for the cpuMean/memory
+        cpuMean = return_logging()
+        memoryUsageAfterBenchmark = measureMemoryUsage()
+
     return [runtime] + [cpuMean] + [memoryUsageAfterBenchmark]
 
 def addToTempStorage(storage, data):
@@ -213,16 +247,16 @@ for width in widths:
                 img_colour = cv2.imread(image_path)
 
                 #Run all the tests again with the new parameters
-                tempDataStorage = addToTempStorage(tempDataStorage, [resize.__name__, source_video, image_path, region_width] + benchmark(resize, img, 10))
-                tempDataStorage = addToTempStorage(tempDataStorage, [rotate.__name__, source_video, image_path, region_width] + benchmark(rotate, img, 10))
-                tempDataStorage = addToTempStorage(tempDataStorage, [mirror.__name__, source_video, image_path, region_width] + benchmark(mirror, img, 10))
+                tempDataStorage = addToTempStorage(tempDataStorage, [resize.__name__, source_video, image_path, region_width] + benchmark(resize, img))
+                tempDataStorage = addToTempStorage(tempDataStorage, [rotate.__name__, source_video, image_path, region_width] + benchmark(rotate, img))
+                tempDataStorage = addToTempStorage(tempDataStorage, [mirror.__name__, source_video, image_path, region_width] + benchmark(mirror, img))
                 tempDataStorage = addToTempStorage(tempDataStorage, [contour.__name__, source_video, image_path, region_width] + benchmark(contour, img))
                 tempDataStorage = addToTempStorage(tempDataStorage, [contrastRandomization.__name__, source_video, image_path, region_width] + benchmark(contrastRandomization, img_colour))
                 tempDataStorage = addToTempStorage(tempDataStorage, [brightnessRandomization.__name__, source_video, image_path, region_width] + benchmark(brightnessRandomization, img_colour))
-                tempDataStorage = addToTempStorage(tempDataStorage, [gaussianBlur.__name__, source_video, image_path, region_width] + benchmark(gaussianBlur, img, 10))
+                tempDataStorage = addToTempStorage(tempDataStorage, [gaussianBlur.__name__, source_video, image_path, region_width] + benchmark(gaussianBlur, img))
                 tempDataStorage = addToTempStorage(tempDataStorage, [meanThresh.__name__, source_video, image_path, region_width] + benchmark(meanThresh, img))
                 tempDataStorage = addToTempStorage(tempDataStorage, [gradientSobel.__name__, source_video, image_path, region_width] + benchmark(gradientSobel, img))
-                tempDataStorage = addToTempStorage(tempDataStorage, [computeHistogram.__name__, source_video, image_path, region_width] + benchmark(computeHistogram, img, 10))
+                tempDataStorage = addToTempStorage(tempDataStorage, [computeHistogram.__name__, source_video, image_path, region_width] + benchmark(computeHistogram, img))
                 tempDataStorage = addToTempStorage(tempDataStorage, [computeCanny.__name__, source_video, image_path, region_width] + benchmark(computeCanny, img))
                 if hasattr(cv2, 'xfeatures2d'):
                     tempDataStorage = addToTempStorage(tempDataStorage, [detectSift.__name__, source_video, image_path, region_width] + benchmark(detectSift, img))
