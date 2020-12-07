@@ -178,9 +178,21 @@ def benchmark(f, img, num_trials=1):
         f(img)
         t1 = time.time()
         times.append((t1-t0)*1000)
-    cpuMean = return_logging()
-    memoryUsageAfterBenchmark = measureMemoryUsage()
     runtime = times[0]
+    
+    if runtime < 10: # The short benchmarks are in this range, and if 1ms is our smallest unit, measuring accuracy is horrible for small values
+        initialize_logging()
+        t0 = time.time()
+        for trials in range(25):
+            f(img)
+        t1 = time.time()
+        runtime = (t1-t0)*40 # * 1000 / 25 --> * 40
+        cpuMean = return_logging() 
+        memoryUsageAfterBenchmark = measureMemoryUsage()
+    else: # putting it in else keeps overhead small for the cpuMean/memory
+        cpuMean = return_logging()
+        memoryUsageAfterBenchmark = measureMemoryUsage()
+
     return [runtime] + [cpuMean] + [memoryUsageAfterBenchmark]
 
 def addToTempStorage(storage, data):
@@ -213,16 +225,16 @@ for width in widths:
                 img_colour = cv2.imread(image_path)
 
                 #Run all the tests again with the new parameters
-                tempDataStorage = addToTempStorage(tempDataStorage, [resize.__name__, source_video, image_path, region_width] + benchmark(resize, img, 10))
-                tempDataStorage = addToTempStorage(tempDataStorage, [rotate.__name__, source_video, image_path, region_width] + benchmark(rotate, img, 10))
-                tempDataStorage = addToTempStorage(tempDataStorage, [mirror.__name__, source_video, image_path, region_width] + benchmark(mirror, img, 10))
+                tempDataStorage = addToTempStorage(tempDataStorage, [resize.__name__, source_video, image_path, region_width] + benchmark(resize, img))
+                tempDataStorage = addToTempStorage(tempDataStorage, [rotate.__name__, source_video, image_path, region_width] + benchmark(rotate, img))
+                tempDataStorage = addToTempStorage(tempDataStorage, [mirror.__name__, source_video, image_path, region_width] + benchmark(mirror, img))
                 tempDataStorage = addToTempStorage(tempDataStorage, [contour.__name__, source_video, image_path, region_width] + benchmark(contour, img))
                 tempDataStorage = addToTempStorage(tempDataStorage, [contrastRandomization.__name__, source_video, image_path, region_width] + benchmark(contrastRandomization, img_colour))
                 tempDataStorage = addToTempStorage(tempDataStorage, [brightnessRandomization.__name__, source_video, image_path, region_width] + benchmark(brightnessRandomization, img_colour))
-                tempDataStorage = addToTempStorage(tempDataStorage, [gaussianBlur.__name__, source_video, image_path, region_width] + benchmark(gaussianBlur, img, 10))
+                tempDataStorage = addToTempStorage(tempDataStorage, [gaussianBlur.__name__, source_video, image_path, region_width] + benchmark(gaussianBlur, img))
                 tempDataStorage = addToTempStorage(tempDataStorage, [meanThresh.__name__, source_video, image_path, region_width] + benchmark(meanThresh, img))
                 tempDataStorage = addToTempStorage(tempDataStorage, [gradientSobel.__name__, source_video, image_path, region_width] + benchmark(gradientSobel, img))
-                tempDataStorage = addToTempStorage(tempDataStorage, [computeHistogram.__name__, source_video, image_path, region_width] + benchmark(computeHistogram, img, 10))
+                tempDataStorage = addToTempStorage(tempDataStorage, [computeHistogram.__name__, source_video, image_path, region_width] + benchmark(computeHistogram, img))
                 tempDataStorage = addToTempStorage(tempDataStorage, [computeCanny.__name__, source_video, image_path, region_width] + benchmark(computeCanny, img))
                 if hasattr(cv2, 'xfeatures2d'):
                     tempDataStorage = addToTempStorage(tempDataStorage, [detectSift.__name__, source_video, image_path, region_width] + benchmark(detectSift, img))
