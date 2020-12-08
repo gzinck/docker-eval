@@ -9,3 +9,5 @@
 
 # The virtual python environment
 **/venv
+
+.DS_STORE
