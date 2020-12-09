@@ -229,11 +229,12 @@ for width in widths:
 
     dataDir = "./data"
     subfolders = [ entry.name for entry in os.scandir(dataDir) if entry.is_dir() ]
-    for folder in subfolders:
+    for folder in sorted(subfolders):
+        print(str(folder))
         directory = os.path.join(dataDir, folder)
         source_video = str(folder)
         tempDataStorage = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []] # one for each benchmark
-        for filename in os.listdir(directory):
+        for filename in sorted(os.listdir(directory)):
             if filename.endswith(".jpg") or filename.endswith(".png"):
                 image_path = os.path.join(directory, filename)
                 print("Image path: " + str(image_path))
