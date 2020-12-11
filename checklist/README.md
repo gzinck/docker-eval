@@ -22,3 +22,4 @@ When creating or using image processing benchmarks, ensure that:
 - [ ] a variety of image resolutions are tested
 - [ ] for feature detection benchmarks, there are images that contain those features
 - [ ] each benchmark's performance is measurable at the precision level of the machines being tested
+    - [ ] if this cannot be guaranteed, workaround should be incorporated into the experiment itself
